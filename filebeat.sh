@@ -18,3 +18,7 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 END
+
+IP=`tracepath 172.18.10.107 | head -n2 | grep -oE "\b([0-9]{1,3}\.){2}[0-9]{1,3}\b"`
+echo 'IP -> elasticsearch cluster:'
+ip a | grep $IP | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" |head -n1
