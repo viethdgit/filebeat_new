@@ -5,3 +5,4 @@
 # systemctl start filebeat2
 # systemctl status filebeat2
 # systemctl stop filebeat2
+# rm -rf /home/vhgs/filebeat_new/
