@@ -7,7 +7,19 @@ filebeat=''
 yml_filebeat=['filebeat.prospectors:']
 with open('/etc/filebeat/filebeat.yml') as f:
 	filebeat= f.read()
-if 'cdnlog_live' in  filebeat:
+
+live=False
+vod=False
+both=False
+netstat_out=os.popen('netstat -tulnp').read()
+if 'live' in HOSTNAME and '0.0.0.0:443' not in netstat_out:
+	both=True
+elif 'varnishd' not in netstat_out:
+	vod=True
+else:
+	live=True
+
+def varnishncsa():
 	yml_filebeat.append('- type: log')
 	yml_filebeat.append('  enabled: true')
 	yml_filebeat.append('  json.keys_under_root: true')
@@ -17,11 +29,11 @@ if 'cdnlog_live' in  filebeat:
 	yml_filebeat.append('    - /var/log/varnish/varnishncsa.log')
 	yml_filebeat.append('  fields:')
 	yml_filebeat.append('    type: "cdnlog_live"')
-	yml_filebeat.append('    host_name: "%s"'%HOSTNAME)
+	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('vod','live'))
 	yml_filebeat.append('    group_name: %s'%GROUPNAME)
 	yml_filebeat.append('    index_prefix: "cdnlog-live"')
 	yml_filebeat.append('  fields_under_root: true')
-if 'cdnlog_vod' in filebeat:
+def nginx_access():
 	yml_filebeat.append('- type: log')
 	yml_filebeat.append('  enabled: true')
 	yml_filebeat.append('  json.keys_under_root: true')
@@ -31,22 +43,22 @@ if 'cdnlog_vod' in filebeat:
 	yml_filebeat.append('    - /usr/local/nginx-1.10.1/logs/access.log')
 	yml_filebeat.append('  fields:')
 	yml_filebeat.append('    type: "cdnlog_vod"')
-	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('live','vod'))
+	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('live','vod') )
 	yml_filebeat.append('    group_name: %s'%GROUPNAME)
 	yml_filebeat.append('    index_prefix: "cdnlog-vod"')
 	yml_filebeat.append('  fields_under_root: true')
-if 'nginx_error_log' in filebeat:
+def nginx_error():
 	yml_filebeat.append('- type: log')
 	yml_filebeat.append('  enabled: true')
 	yml_filebeat.append('  paths:')
 	yml_filebeat.append('    - /usr/local/nginx-1.10.1/logs/error.log')
 	yml_filebeat.append('  fields:')
 	yml_filebeat.append('    type: "nginx_error_log"')
-	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('live','vod'))
+	yml_filebeat.append('    host_name: "%s"'%HOSTNAME)
 	yml_filebeat.append('    group_name: %s'%GROUPNAME)
 	yml_filebeat.append('    index_prefix: "weblog-nginx-error"')
 	yml_filebeat.append('  fields_under_root: true')
-if 'vcdn-live-agent-events' in filebeat:
+def trace_live():
 	yml_filebeat.append('- type: log')
 	yml_filebeat.append('  enabled: true')
 	yml_filebeat.append('  json.keys_under_root: true')
@@ -55,12 +67,12 @@ if 'vcdn-live-agent-events' in filebeat:
 	yml_filebeat.append('  paths:')
 	yml_filebeat.append('    - /var/log/vcdn-live-agent-events.log')
 	yml_filebeat.append('  fields:')
-	yml_filebeat.append('    type: "cdnlog_trace"')
-	yml_filebeat.append('    host_name: "%s"'%(HOSTNAME.replace('vod','live')))
+	yml_filebeat.append('    type: "cdnlog_trace_live"')
+	yml_filebeat.append('    host_name: "%s"'%(HOSTNAME).replace('vod','live'))
 	yml_filebeat.append('    group_name: %s'%GROUPNAME)
 	yml_filebeat.append('    index_prefix: "cdnlog-trace"')
 	yml_filebeat.append('  fields_under_root: true')
-if 'vcdn-vod-agent-events' in filebeat:
+def trace_vod():
 	yml_filebeat.append('- type: log')
 	yml_filebeat.append('  enabled: true')
 	yml_filebeat.append('  json.keys_under_root: true')
@@ -69,11 +81,29 @@ if 'vcdn-vod-agent-events' in filebeat:
 	yml_filebeat.append('  paths:')
 	yml_filebeat.append('    - /var/log/vcdn-vod-agent-events.log')
 	yml_filebeat.append('  fields:')
-	yml_filebeat.append('    type: "cdnlog_trace"')
-	yml_filebeat.append('    host_name: "%s"'%(HOSTNAME.replace('live','vod')))
+	yml_filebeat.append('    type: "cdnlog_trace_vod"')
+	yml_filebeat.append('    host_name: "%s"'%(HOSTNAME).replace('live','vod'))
 	yml_filebeat.append('    group_name: %s'%GROUPNAME)
 	yml_filebeat.append('    index_prefix: "cdnlog-trace"')
 	yml_filebeat.append('  fields_under_root: true')
+
+if both == True:
+	varnishncsa()
+	nginx_access()
+	nginx_error()
+	trace_live()
+	trace_vod()
+elif live == True:
+	varnishncsa()
+	nginx_error()
+	trace_live()
+elif vod == True:
+	nginx_access()
+	nginx_error()
+	trace_vod()
+else:
+	pass
+
 if 'speedtest' in filebeat:
 	yml_filebeat.append('- type: log')
 	yml_filebeat.append('  enabled: true')
@@ -115,6 +145,8 @@ yml_filebeat.append('  path: /var/log/filebeat')
 yml_filebeat.append('  name: filebeat2')
 yml_filebeat.append('  keepfiles: 2')
 yml_filebeat.append('filebeat.registry_file: 2-registry')
+
+os.system('echo "#" > /opt/filebeat2/filebeat.yml')
 
 f = open ('/opt/filebeat2/filebeat.yml','a')
 for i in yml_filebeat:
