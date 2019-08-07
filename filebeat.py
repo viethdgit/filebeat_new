@@ -1,7 +1,6 @@
 import os
 
-
-HOSTNAME=os.popen('hostname').read().strip().replace('.novalocal','')
+HOSTNAME=os.popen('hostname').read().strip().replace('.novalocal','').replace('vdc-','vdc1-')
 GROUPNAME=HOSTNAME.split('-')[0] if HOSTNAME.split('-')[0] != 'bd' else 'vt2'
 
 filebeat=''
