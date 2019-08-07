@@ -117,8 +117,8 @@ yml_filebeat.append('  name: filebeat2')
 yml_filebeat.append('  keepfiles: 2')
 yml_filebeat.append('filebeat.registry_file: 2-registry')
 
-# f = open ('/opt/filebeat2/filebeat.yml','a')
+f = open ('/opt/filebeat2/filebeat.yml','a')
 for i in yml_filebeat:
 	print i
-# 	f.write(i+'\n')
-# f.close()
+	f.write(i+'\n')
+f.close()
