@@ -1,4 +1,5 @@
 # filebeat_new
+# cd /home/vhgs/
 # git clone https://github.com/viethdgit/filebeat_new.git
 # chmod +x filebeat_new/filebeat.sh
 # filebeat_new/filebeat.sh
