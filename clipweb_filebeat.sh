@@ -1,5 +1,6 @@
  #!/bin/sh
  
+ cp /etc/filebeat/filebeat.yml /root/filebeat.old
  cat > /etc/filebeat/filebeat.yml <<END
 filebeat:
   prospectors:
