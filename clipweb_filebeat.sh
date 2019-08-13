@@ -1,7 +1,9 @@
  #!/bin/sh
  
- cp /etc/filebeat/filebeat.yml /root/filebeat.old
- cat > /etc/filebeat/filebeat.yml <<END
+cp /etc/filebeat/filebeat.yml /root/filebeat.old
+cp -r /var/lib/filebeat /root/filebeat.old/
+
+cat > /etc/filebeat/filebeat.yml <<END
 filebeat:
   prospectors:
   -
