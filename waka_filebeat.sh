@@ -5,6 +5,9 @@ cat > /etc/filebeat/filebeat.yml <<END
 filebeat:
   prospectors:
   -
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.overwrite_keys: true
     paths:
       - /usr/local/nginx/logs/waka.vn-access.log
     input_type: log

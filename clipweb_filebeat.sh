@@ -5,9 +5,12 @@
 filebeat:
   prospectors:
   -
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.overwrite_keys: true
     paths:
       - /usr/local/webclip/logs/clip.vn-access.log
-    input_type: log
+    input_type: log 
     fields:
       type: weblog
       host_name: ${HOSTNAME}
@@ -25,4 +28,5 @@ output:
     template.overwrite: false
 logging:
   level: error
+
 END
