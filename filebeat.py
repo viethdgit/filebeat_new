@@ -160,6 +160,7 @@ for i in yml_filebeat:
 	print i
 	f.write(i+'\n')
 f.close()
+
 if '2.' not in ker_ver:
 	os.system('systemctl restart filebeat2')
 	print os.popen('systemctl status filebeat2').read()
