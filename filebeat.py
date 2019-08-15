@@ -162,7 +162,7 @@ for i in yml_filebeat:
 f.close()
 if '2.' not in ker_ver:
 	os.system('systemctl restart filebeat2')
-	print os.popen('systemctl status filebeat2')
+	print os.popen('systemctl status filebeat2').read()
 else:
 	os.system('service filebeat restart')
-	print os.popen('service filebeat status')
+	print os.popen('service filebeat status').read()
