@@ -3,9 +3,14 @@ import os
 HOSTNAME=os.popen('hostname').read().strip().replace('.novalocal','').replace('vdc-','vdc1-').replace('fpt-','fpt1-')
 GROUPNAME=HOSTNAME.split('-')[0] if HOSTNAME.split('-')[0] != 'bd' else 'vt2'
 
+ker_ver=os.popen('uname -r').read()
+path_yml='/opt/filebeat2/filebeat.yml'
+if '2.' in ker_ver:
+	path_yml='/etc/filebeat/filebeat.yml'
+
 filebeat=''
 yml_filebeat=['filebeat.prospectors:']
-with open('/etc/filebeat/filebeat.yml') as f:
+with open(path_yml) as f:
 	filebeat= f.read()
 
 live=False
@@ -135,7 +140,10 @@ yml_filebeat.append('setup.template.settings:')
 yml_filebeat.append('  index.number_of_shards: 3')
 yml_filebeat.append('')
 yml_filebeat.append('output.elasticsearch:')
-yml_filebeat.append('  hosts: ["172.18.10.106:9208","172.18.10.106:9209", "172.18.10.107:9208","172.18.10.107:9209", "172.18.10.108:9208","172.18.10.108:9209", "172.25.0.15:9208","172.25.0.15:9209","172.25.0.16:9208","172.25.0.16:9209", "172.25.0.14:9208","172.25.0.14:9209"]')
+if '103.216.122.101:9208' in filebeat:
+	yml_filebeat.append('  hosts: ["103.216.122.101:9208"]')
+else
+	yml_filebeat.append('  hosts: ["172.18.10.106:9208","172.18.10.106:9209", "172.18.10.107:9208","172.18.10.107:9209", "172.18.10.108:9208","172.18.10.108:9209", "172.25.0.15:9208","172.25.0.15:9209","172.25.0.16:9208","172.25.0.16:9209", "172.25.0.14:9208","172.25.0.14:9209"]')
 yml_filebeat.append('  worker: 4')
 yml_filebeat.append('  bulk_max_size: 2048')
 yml_filebeat.append('  indices:')
@@ -148,12 +156,6 @@ yml_filebeat.append('  name: filebeat2')
 yml_filebeat.append('  keepfiles: 2')
 yml_filebeat.append('filebeat.registry_file: 2-registry')
 
-
-ker_ver=os.popen('uname -r').read()
-path_yml='/opt/filebeat2/filebeat.yml'
-if '2.' in ker_ver:
-	path_yml='/etc/filebeat/filebeat.yml'
-os.system('echo "#" > %s'%path_yml)
 
 f = open (path_yml,'a')
 for i in yml_filebeat:
