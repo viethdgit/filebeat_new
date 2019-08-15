@@ -27,6 +27,7 @@ def varnishncsa():
 	yml_filebeat.append('  json.overwrite_keys: true')
 	yml_filebeat.append('  paths:')
 	yml_filebeat.append('    - /var/log/varnish/varnishncsa.log')
+	yml_filebeat.append('    - /var/log/varnish/varnishncsa.log-20190815')
 	yml_filebeat.append('  fields:')
 	yml_filebeat.append('    type: "cdnlog_live"')
 	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('vod','live'))
@@ -41,9 +42,10 @@ def nginx_access():
 	yml_filebeat.append('  json.overwrite_keys: true')
 	yml_filebeat.append('  paths:')
 	yml_filebeat.append('    - /usr/local/nginx-1.10.1/logs/access.log')
+	yml_filebeat.append('    - /usr/local/nginx-1.10.1/logs/access.log-20190815')
 	yml_filebeat.append('  fields:')
 	yml_filebeat.append('    type: "cdnlog_vod"')
-	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('live','vod') )
+	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('live','vod').replace('vodd','vod') )
 	yml_filebeat.append('    group_name: %s'%GROUPNAME)
 	yml_filebeat.append('    index_prefix: "cdnlog-vod"')
 	yml_filebeat.append('  fields_under_root: true')
@@ -146,9 +148,14 @@ yml_filebeat.append('  name: filebeat2')
 yml_filebeat.append('  keepfiles: 2')
 yml_filebeat.append('filebeat.registry_file: 2-registry')
 
-os.system('echo "#" > /opt/filebeat2/filebeat.yml')
 
-f = open ('/opt/filebeat2/filebeat.yml','a')
+ker_ver=os.popen('uname -r').read()
+path_yml='/opt/filebeat2/filebeat.yml'
+if '2.' in ker_ver:
+	path_yml='/etc/filebeat/filebeat.yml'
+os.system('echo "#" > %s'%path_yml)
+
+f = open (path_yml,'a')
 for i in yml_filebeat:
 	print i
 	f.write(i+'\n')
