@@ -142,7 +142,7 @@ yml_filebeat.append('')
 yml_filebeat.append('output.elasticsearch:')
 if '103.216.122.101:9208' in filebeat:
 	yml_filebeat.append('  hosts: ["103.216.122.101:9208"]')
-else
+else:
 	yml_filebeat.append('  hosts: ["172.18.10.106:9208","172.18.10.106:9209", "172.18.10.107:9208","172.18.10.107:9209", "172.18.10.108:9208","172.18.10.108:9209", "172.25.0.15:9208","172.25.0.15:9209","172.25.0.16:9208","172.25.0.16:9209", "172.25.0.14:9208","172.25.0.14:9209"]')
 yml_filebeat.append('  worker: 4')
 yml_filebeat.append('  bulk_max_size: 2048')
