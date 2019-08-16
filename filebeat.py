@@ -3,9 +3,9 @@ import os
 HOSTNAME=os.popen('hostname').read().strip().replace('.novalocal','').replace('vdc-','vdc1-').replace('fpt-','fpt1-')
 GROUPNAME=HOSTNAME.split('-')[0] if HOSTNAME.split('-')[0] != 'bd' else 'vt2'
 
-ker_ver=os.popen('uname -r').read()
+os_ver=os.popen('cat /etc/system-release').read()
 path_yml='/opt/filebeat2/filebeat.yml'
-if '2.' in ker_ver:
+if 'release 6' in os_ver :
 	path_yml='/etc/filebeat/filebeat.yml'
 
 filebeat=''
@@ -32,7 +32,7 @@ def varnishncsa():
 	yml_filebeat.append('  json.overwrite_keys: true')
 	yml_filebeat.append('  paths:')
 	yml_filebeat.append('    - /var/log/varnish/varnishncsa.log')
-	yml_filebeat.append('    - /var/log/varnish/varnishncsa.log-20190815')
+	yml_filebeat.append('    - /var/log/varnish/varnishncsa.log-20190816')
 	yml_filebeat.append('  fields:')
 	yml_filebeat.append('    type: "cdnlog_live"')
 	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('vod','live'))
@@ -47,7 +47,7 @@ def nginx_access():
 	yml_filebeat.append('  json.overwrite_keys: true')
 	yml_filebeat.append('  paths:')
 	yml_filebeat.append('    - /usr/local/nginx-1.10.1/logs/access.log')
-	yml_filebeat.append('    - /usr/local/nginx-1.10.1/logs/access.log-20190815')
+	yml_filebeat.append('    - /usr/local/nginx-1.10.1/logs/access.log-20190816')
 	yml_filebeat.append('  fields:')
 	yml_filebeat.append('    type: "cdnlog_vod"')
 	yml_filebeat.append('    host_name: "%s"'%HOSTNAME.replace('live','vod').replace('vodd','vod') )
@@ -140,10 +140,11 @@ yml_filebeat.append('setup.template.settings:')
 yml_filebeat.append('  index.number_of_shards: 3')
 yml_filebeat.append('')
 yml_filebeat.append('output.elasticsearch:')
-if '103.216.122.101:9208' in filebeat:
-	yml_filebeat.append('  hosts: ["103.216.122.101:9208"]')
+if '103.216.122.101:9208' in filebeat or GROUPNAME=='vt2':
+	yml_filebeat.append('  hosts: ["103.216.122.100:9208"]')
 else:
 	yml_filebeat.append('  hosts: ["172.18.10.106:9208","172.18.10.106:9209", "172.18.10.107:9208","172.18.10.107:9209", "172.18.10.108:9208","172.18.10.108:9209", "172.25.0.15:9208","172.25.0.15:9209","172.25.0.16:9208","172.25.0.16:9209", "172.25.0.14:9208","172.25.0.14:9209"]')
+yml_filebeat.append('  loadbalance: true')
 yml_filebeat.append('  worker: 4')
 yml_filebeat.append('  bulk_max_size: 2048')
 yml_filebeat.append('  indices:')
@@ -156,16 +157,16 @@ yml_filebeat.append('  name: filebeat2')
 yml_filebeat.append('  keepfiles: 2')
 yml_filebeat.append('filebeat.registry_file: 2-registry')
 
-
+os.system('echo "#" > %s'%path_yml)
 f = open (path_yml,'a')
 for i in yml_filebeat:
 	print i
 	f.write(i+'\n')
 f.close()
 
-if '2.' not in ker_ver:
-	os.system('systemctl restart filebeat2')
-	print os.system('systemctl status filebeat2')
-else:
+if 'release 6' in os_ver :
 	os.system('service filebeat restart')
 	print os.system('service filebeat status')
+else:
+	os.system('systemctl restart filebeat2')
+	print os.system('systemctl status filebeat2')
